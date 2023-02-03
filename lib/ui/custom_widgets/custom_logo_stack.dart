@@ -7,21 +7,17 @@ class CustomLogoStack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Center(
-          child: CircleAvatar(
-            backgroundColor: Theme.of(context).canvasColor,
-            radius: 50,
-          ),
-        ),
-        Center(
+    return Center(
+      child: CircleAvatar(
+        backgroundColor: Theme.of(context).canvasColor,
+        radius: mSize,
+        child: Center(
             child: ImageIcon(
               AssetImage('assets/images/wallet_bw.png'),
-              size: 50,
+              size: mSize,
               color: Theme.of(context).backgroundColor,
-            ))
-      ],
+            )),
+      ),
     );
   }
 }
