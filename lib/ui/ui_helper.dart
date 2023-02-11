@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class MyColor{
+class MyColor {
 
   //light theme colors
   static const Color bgWColor = Color(0xffffffff);

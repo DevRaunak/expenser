@@ -29,7 +29,7 @@ class _SplashPageState extends State<SplashPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       body: Center(
-        child: CustomLogoStack(50),
+        child: CustomLogoStack(mSize: 50, mBgColor: Theme.of(context).canvasColor, mIconColor: Theme.of(context).backgroundColor,),
       ),
     );
   }

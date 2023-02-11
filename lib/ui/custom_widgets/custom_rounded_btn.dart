@@ -4,21 +4,29 @@ import 'package:flutter/material.dart';
 class CustomRoundedButton extends StatelessWidget {
   VoidCallback callback;
   String text;
+  Widget? mChild;
 
-  CustomRoundedButton({required this.callback, required this.text});
+  CustomRoundedButton({required this.callback, required this.text, this.mChild});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       height: 50,
-      child: ElevatedButton(onPressed: callback,
-          child: Text(text, style: mTextStyle16(mColor: Theme.of(context).backgroundColor, fontWeight: FontWeight.w800),),
+      child: ElevatedButton(
+        onPressed: callback,
         style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(21)
-          ),
-          primary: Theme.of(context).brightness == Brightness.light ? MyColor.secondaryBColor : MyColor.secondaryWColor,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(21)),
+          primary: Theme.of(context).brightness == Brightness.light
+              ? MyColor.secondaryBColor
+              : MyColor.secondaryWColor,
+        ),
+        child: mChild ?? Text(
+          text,
+          style: mTextStyle16(
+              mColor: Theme.of(context).backgroundColor,
+              fontWeight: FontWeight.w800),
         ),
       ),
     );

@@ -1,6 +1,8 @@
+import 'package:expenser/screens/home/home_page.dart';
 import 'package:expenser/screens/splash/splash_page.dart';
 import 'package:expenser/ui/ui_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:toast/toast.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,6 +30,6 @@ class MyApp extends StatelessWidget {
             backgroundColor: MyColor.bgWColor,
             canvasColor: MyColor.bgBColor,
             shadowColor: MyColor.lightTextWColor),
-        home: SplashPage());
+        home: HomePage());
   }
 }
