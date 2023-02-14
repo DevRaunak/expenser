@@ -1,4 +1,5 @@
 import 'package:expenser/constants.dart';
+import 'package:expenser/screens/add_expense/add_expense_page.dart';
 import 'package:expenser/ui/custom_widgets/custom_rounded_btn.dart';
 import 'package:expenser/ui/ui_helper.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +14,7 @@ class FragTransactionPage extends StatelessWidget {
     return Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
         body: MediaQuery.of(context).orientation == Orientation.portrait
-            ? portraitUI()
+            ? portraitUI(context)
             : landscapeUI());
   }
 
@@ -32,7 +33,9 @@ class FragTransactionPage extends StatelessWidget {
                 width: 200,
                 height: 40,
                 child: CustomRoundedButton(
-                    callback: () {},
+                    callback: () {
+
+                    },
                     text: "",
                     mChild: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -50,29 +53,34 @@ class FragTransactionPage extends StatelessWidget {
     );
   }
 
-  Widget portraitUI() {
+  Widget portraitUI(BuildContext context) {
     return Column(
       children: [
-        Expanded(flex: 1, child: addTransactionUI()),
+        Expanded(flex: 1, child: addTransactionUI(context)),
         Expanded(flex: 7, child: totalBalanceUI()),
         Expanded(flex: 11, child: allTransactionsUI())
       ],
     );
   }
 
-  Widget addTransactionUI() {
+  Widget addTransactionUI(BuildContext context) {
     return SizedBox(
       width: double.infinity,
       child: Align(
         alignment: Alignment.centerRight,
-        child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: CircleAvatar(
-            backgroundColor: isLight ? MyColor.bgBColor : MyColor.bgWColor,
-            child: Icon(
-              Icons.add,
-              color: isLight ? MyColor.bgWColor : MyColor.bgBColor,
-              size: 18,
+        child: InkWell(
+          onTap: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => AddExpensePage(),));
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: CircleAvatar(
+              backgroundColor: isLight ? MyColor.bgBColor : MyColor.bgWColor,
+              child: Icon(
+                Icons.add,
+                color: isLight ? MyColor.bgWColor : MyColor.bgBColor,
+                size: 18,
+              ),
             ),
           ),
         ),

@@ -14,6 +14,8 @@ class MyColor {
   static const Color textBColor = Color(0xffffffff);
   static const Color lightTextBColor = Color(0xffcccccc);
 
+
+
 }
 
 MaterialColor createMaterialColor(Color color) {
@@ -138,3 +140,4 @@ TextStyle mTextStyle12({
       fontFamily: 'Quicksand'
   );
 }
+
