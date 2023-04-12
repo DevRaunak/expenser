@@ -1,11 +1,22 @@
+import 'package:expenser/bloc/ExpenseCatType/expense_type_bloc.dart';
+import 'package:expenser/bloc/expense_bloc.dart';
 import 'package:expenser/screens/home/home_page.dart';
 import 'package:expenser/screens/splash/splash_page.dart';
 import 'package:expenser/ui/ui_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:toast/toast.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MultiBlocProvider(providers: [
+    BlocProvider<ExpenseBloc>(
+      create: (BuildContext context) => ExpenseBloc(),
+    ),
+
+    BlocProvider<ExpenseTypeBloc>(
+      create: (BuildContext context) => ExpenseTypeBloc(),
+    ),
+  ], child: const MyApp(),));
 }
 
 class MyApp extends StatelessWidget {

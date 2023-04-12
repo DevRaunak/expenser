@@ -1,6 +1,12 @@
-
+import 'package:expenser/bloc/ExpenseCatType/expense_type_bloc.dart';
+import 'package:expenser/bloc/expense_bloc.dart';
 import 'package:expenser/constants.dart';
+import 'package:expenser/models/cat_model.dart';
+import 'package:expenser/models/expense_model.dart';
+import 'package:expenser/ui/custom_widgets/custom_rounded_btn.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../ui/ui_helper.dart';
 
@@ -18,9 +24,18 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
   var _selectedIndex = -1;
 
+  List<CatModel> arrExpenseType = [];
+
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<ExpenseTypeBloc>(context).add(FetchAllCatExpenseType());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MyColor.bgBColor,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 21.0),
         child: Column(
@@ -88,6 +103,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                     height: 21,
                   ),
                   TextField(
+                    textAlign: TextAlign.end,
                     style: mTextStyle16(mColor: MyColor.textBColor),
                     controller: descController,
                     keyboardType: TextInputType.text,
@@ -103,55 +119,111 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   SizedBox(
                     height: 21,
                   ),
-                  SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: OutlinedButton(
-                          onPressed: () {
-                            showModalBottomSheet(context: context, 
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.only(topLeft: Radius.circular(21), topRight: Radius.circular(21))
-                                ),
-                                builder: (context){
-                              return GridView.builder(
-                                shrinkWrap: true,
-                                itemCount: Constants.arrType.length,
-                                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 70),
-                                  itemBuilder: (context, index){
-                                return InkWell(
-                                  onTap: (){
-                                    Navigator.pop(context);
-                                    _selectedIndex = index;
-                                    setState((){
-
+                  BlocListener<ExpenseTypeBloc, ExpenseTypeState>(
+                    listener: (context, state) {
+                      if (state is ExpenseTypeLoadedState) {
+                        arrExpenseType = state.arrExpenseType;
+                        setState(() {});
+                      }
+                    },
+                    child: Visibility(
+                      visible: arrExpenseType.isNotEmpty,
+                      child: SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: OutlinedButton(
+                              onPressed: () {
+                                showModalBottomSheet(
+                                    context: context,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(21),
+                                            topRight: Radius.circular(21))),
+                                    builder: (context) {
+                                      return GridView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: arrExpenseType.length,
+                                          gridDelegate:
+                                              SliverGridDelegateWithMaxCrossAxisExtent(
+                                                  maxCrossAxisExtent: 100),
+                                          itemBuilder: (context, index) {
+                                            return InkWell(
+                                              onTap: () {
+                                                Navigator.pop(context);
+                                                _selectedIndex = index;
+                                                setState(() {});
+                                              },
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: Image.asset(
+                                                    arrExpenseType[index]
+                                                        .imgPath),
+                                              ),
+                                            );
+                                          });
                                     });
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Image.asset(Constants.arrType[index]),
-                                  ),
-                                );
-                                  });
-                            });
-                          },
-                          child: _selectedIndex == -1 ? Text(
-                            'Select Expense Type',
-                            style: mTextStyle16(mColor: Colors.grey),
-                          ) : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text('Selected - '),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Image.asset(Constants.arrType[_selectedIndex]),
-                              )
-                            ],
-                          ))),
+                              },
+                              child: _selectedIndex == -1
+                                  ? Text(
+                                      'Select Expense Type',
+                                      style: mTextStyle16(mColor: Colors.grey),
+                                    )
+                                  : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Selected - ',
+                                          style: mTextStyle16(
+                                              mColor: MyColor.textBColor),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Image.asset(
+                                              arrExpenseType[_selectedIndex]
+                                                  .imgPath),
+                                        )
+                                      ],
+                                    ))),
+                    ),
+                  ),
                   SizedBox(
                     height: 21,
                   ),
+                  BlocListener<ExpenseBloc, ExpenseState>(
+                    listener: (context, state) {
+                      if(state is ExpenseLoadingState){
+                        print("Loading");
+                      } else if(state is ExpenseLoadedState){
+                        print("Loaded");
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: CustomRoundedButton(
+                        callback: () {
+                          var frmt = DateFormat.y();
+                          var frmt2 = DateFormat.MMMMd();
+                          var frmt3 = DateFormat.Hms();
 
+                          var currentTime =
+                              '${frmt.format(DateTime.now())} ${frmt2.format(DateTime.now())} ${frmt3.format(DateTime.now())}.${DateTime.now().millisecond}';
+                          print(currentTime);
 
+                          if (_selectedIndex != -1) {
+                            BlocProvider.of<ExpenseBloc>(context).add(
+                                NewExpenseEvent(ExpenseModel(
+                                    title: titleController.text,
+                                    desc: descController.text,
+                                    amt: double.parse(
+                                        amtController.text.toString()),
+                                    expenseType: "credit",
+                                    catId: arrExpenseType[_selectedIndex].catId,
+                                    time: currentTime)));
+                          }
+                        },
+                        text: 'Add'),
+                  )
                 ],
               ),
             ))
