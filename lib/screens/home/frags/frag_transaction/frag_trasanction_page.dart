@@ -8,7 +8,9 @@ import 'package:expenser/ui/custom_widgets/custom_rounded_btn.dart';
 import 'package:expenser/ui/ui_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
+import '../../../../models/date_wise_expense_model.dart';
 import '../../../../models/expense_model.dart';
 
 class FragTransactionPage extends StatefulWidget {
@@ -18,6 +20,13 @@ class FragTransactionPage extends StatefulWidget {
 
 class _FragTransactionPageState extends State<FragTransactionPage> {
   bool isLight = true;
+
+  List<ExpenseModel> arrExpense = [];
+  List<DateWiseExpenseModel> arrData = [];
+  var frmt = DateFormat.y();
+  var frmt2 = DateFormat.MMMMd();
+  var frmt3 = DateFormat.MMMM();
+  var frmt4 = DateFormat.d();
 
   @override
   void initState() {
@@ -32,36 +41,240 @@ class _FragTransactionPageState extends State<FragTransactionPage> {
 
     return Scaffold(
         backgroundColor: Theme.of(context).backgroundColor,
-        body: BlocBuilder<ExpenseBloc, ExpenseState>(
-          builder: (ctx, state) {
-            if (state is ExpenseLoadingState) {
-              return CircularProgressIndicator();
-            } else if (state is ExpenseLoadedState) {
-              if (state.arrExpenses.isNotEmpty) {
-                return MediaQuery.of(context).orientation ==
-                        Orientation.portrait
-                    ? portraitUI(context, state.arrExpenses)
-                    : portraitUI(context, state.arrExpenses);
-              } else {
-                return Container(
-                  child: Center(
-                    child: Text(
-                      'No Expense Yet!',
-                      style: mTextStyle43(
-                          mColor: Colors.white, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                );
-              }
-            } else if (state is ExpenseErrorState) {
-              return Container();
-            }
-            return Container();
-          },
+        body: Column(
+          children: [
+            Expanded(flex: 1, child: addTransactionUI(context)),
+            Expanded(
+              flex: 18,
+              child: BlocBuilder<ExpenseBloc, ExpenseState>(
+                builder: (ctx, state) {
+                  if (state is ExpenseLoadingState) {
+                    return CircularProgressIndicator();
+                  } else if (state is ExpenseLoadedState) {
+                    arrExpense = state.arrExpenses.reversed.toList();
+                    if (state.arrExpenses.isNotEmpty) {
+                      arrData.clear();
+                      List<String> arrUniqueDates = [];
+                      List<String> arrUniqueMonths = [];
+
+                      for (ExpenseModel expense in arrExpense) {
+                        var date = DateTime.parse(expense.time!);
+
+                        var eachDate =
+                            '${date.year}-${date.month.toString().length == 1 ? '0${date.month}' : '${date.month}'}-${date.day}';
+                        print(eachDate);
+
+                        var eachMonth =
+                            '${date.year}-${date.month.toString().length == 1 ? '0${date.month}' : '${date.month}'}';
+
+                        if (!arrUniqueDates.contains(eachDate)) {
+                          arrUniqueDates.add(eachDate);
+                        }
+
+                        if(!arrUniqueMonths.contains(eachMonth)){
+                          arrUniqueMonths.add(eachMonth);
+                        }
+                      }
+
+                      print(arrUniqueDates);
+                      print(arrUniqueMonths);
+
+                      filterExpensesDateWise(arrUniqueDates);
+                      //filterExpenseMonthWise(arrUniqueMonths);
+
+                      return MediaQuery.of(context).orientation ==
+                              Orientation.portrait
+                          ? portraitUI(context, arrData)
+                          : landscapeUI(context, arrData);
+                    } else {
+                      return Container(
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'No Expense Yet!',
+                                style: mTextStyle43(
+                                    mColor: Colors.white,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              InkWell(
+                                  onTap: () {
+
+                                  },
+                                  child: Icon(Icons.add_box_outlined))
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                  } else if (state is ExpenseErrorState) {
+                    return Container();
+                  }
+                  return Container();
+                },
+              ),
+            ),
+          ],
         ));
   }
 
-  /*Widget landscapeUI() {
+  void navigateToAddExpensePage(){
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AddExpensePage(
+              arrExpense.isNotEmpty
+                  ? arrExpense[0]
+                  .bal!
+                  : 0.0),
+        ));
+  }
+
+  void filterExpensesDateWise(List<String> uniqueDates) {
+    for (String date in uniqueDates) {
+      List<ExpenseModel> eachDayTransactions = [];
+
+      eachDayTransactions =
+          arrExpense.where((expense) => expense.time!.contains(date)).toList();
+
+      double eachDayAmt = 0.0;
+
+      for (ExpenseModel trans in eachDayTransactions) {
+        eachDayAmt = trans.expenseType == "Debit"
+            ? eachDayAmt + trans.amt!
+            : eachDayAmt - trans.amt!;
+      }
+
+      var todayDate = '${DateTime
+          .now()
+          .year}-${DateTime
+          .now()
+          .month
+          .toString()
+          .length == 1 ? '0${DateTime
+          .now()
+          .month}' : '${DateTime
+          .now()
+          .month}'}-${DateTime
+          .now()
+          .day}';
+
+      var yesterdayDate =
+          '${DateTime
+          .now()
+          .year}-${DateTime
+          .now()
+          .month
+          .toString()
+          .length == 1 ? '0${DateTime
+          .now()
+          .month}' : '${DateTime
+          .now()
+          .month}'}-${DateTime
+          .now()
+          .day - 1}';
+
+      if (date == todayDate) {
+        date = 'Today';
+      } else if (date == yesterdayDate) {
+        date = 'Yesterday';
+      }
+
+      arrData.add(DateWiseExpenseModel(
+          date: date,
+          amt: eachDayAmt.toString(),
+          arrExpenses: eachDayTransactions));
+
+      /* var today = DateTime.now().day;
+    var month = DateTime.now().month;
+    var year = DateTime.now().year;*/
+
+      /*var frmt = DateFormat.y();
+    var frmt2 = DateFormat.MMMMd();
+
+    var todayMonthYear =
+        '${frmt.format(DateTime.now())} ${frmt2.format(DateTime.now())}';
+
+    print(todayMonthYear);*/
+      /*arrExpense.where((expense) {
+      if(expense.time!.contains(todayMonthYear)){
+        arrTransactions.add(expense);
+      }
+      return true;
+    });*/
+
+      /*for (ExpenseModel expense in arrExpense) {
+        if (expense.time!.contains(date)) {
+          eachDayTransactions.add(expense);
+        }
+      }*/
+
+      /* arrExpense.removeWhere((expense) {
+        if (expense.time!.contains(todayMonthYear)) {
+          return true;
+        } else {
+          return false;
+        }
+      });*/
+
+      /*var totalOtherAmt = 0.0;
+      for (ExpenseModel expense in arrExpense) {
+        if (expense.expenseType == "Debit") {
+          totalOtherAmt += expense.amt!;
+        } else {
+          totalOtherAmt -= expense.amt!;
+        }
+      }
+
+      arrData.add(DateWiseExpenseModel(
+          date: 'Prev',
+          amt: totalOtherAmt.toString(),
+          arrExpenses: arrExpense));
+    }*/
+    }
+  }
+
+  /*void filterExpenseMonthWise(List<String> uniqueMonths){
+
+    List<Map<String,dynamic>> arrMonthWiseBal = [];
+
+    for(String eachMonth in uniqueMonths){
+
+      List<ExpenseModel> arrEachMonthExpense = [];
+
+      for(ExpenseModel expense in arrExpense){
+        if(expense.time!.contains(eachMonth)){
+          arrEachMonthExpense.add(expense);
+        }
+      }
+
+      double eachMonthBal = 0.0;
+
+      for(ExpenseModel expense in arrEachMonthExpense){
+        if(expense.expenseType=="Debit"){
+          eachMonthBal += expense.amt!;
+        } else {
+          eachMonthBal -= expense.amt!;
+        }
+      }
+
+      print(Constants.mapMonth.toString());
+
+      arrMonthWiseBal.add({
+        'month': Constants.mapMonth[eachMonth.split('-')[1]],
+        'bal': eachMonthBal
+      });
+
+
+    }
+
+    print(arrMonthWiseBal);
+
+  }*/
+
+
+    Widget landscapeUI(BuildContext context, List<DateWiseExpenseModel> arrDayWiseExpense) {
     return Row(
       children: [
         Expanded(
@@ -91,17 +304,17 @@ class _FragTransactionPageState extends State<FragTransactionPage> {
             ],
           ),
         ),
-        Expanded(child: allTransactionsUI())
+        Expanded(child: allTransactionsUI(arrDayWiseExpense))
       ],
     );
-  }*/
+  }
 
-  Widget portraitUI(BuildContext context, List<ExpenseModel> arrExpense) {
+  Widget portraitUI(
+      BuildContext context, List<DateWiseExpenseModel> arrDayWiseExpense) {
     return Column(
       children: [
-        Expanded(flex: 1, child: addTransactionUI(context)),
         Expanded(flex: 7, child: totalBalanceUI()),
-        Expanded(flex: 11, child: allTransactionsUI(arrExpense))
+        Expanded(flex: 11, child: allTransactionsUI(arrDayWiseExpense))
       ],
     );
   }
@@ -113,11 +326,7 @@ class _FragTransactionPageState extends State<FragTransactionPage> {
         alignment: Alignment.centerRight,
         child: InkWell(
           onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AddExpensePage(),
-                ));
+            navigateToAddExpensePage();
           },
           child: Padding(
             padding: const EdgeInsets.all(4.0),
@@ -139,7 +348,7 @@ class _FragTransactionPageState extends State<FragTransactionPage> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('Spent this Week',
+        Text('Spent Till now',
             style: mTextStyle12(
                 mColor: isLight
                     ? MyColor.secondaryWColor
@@ -154,12 +363,12 @@ class _FragTransactionPageState extends State<FragTransactionPage> {
                       : MyColor.secondaryBColor,
                   fontWeight: FontWeight.bold)),
           TextSpan(
-              text: '292',
+              text: '${arrExpense[0].bal.toString().split('.')[0]}',
               style: mTextStyle52(
                   fontWeight: FontWeight.bold,
                   mColor: isLight ? MyColor.textWColor : MyColor.textBColor)),
           TextSpan(
-              text: '.50',
+              text: '.${arrExpense[0].bal.toString().split('.')[1]}',
               style: mTextStyle26(
                   fontWeight: FontWeight.bold,
                   mColor: isLight ? MyColor.textWColor : MyColor.textBColor))
@@ -168,11 +377,11 @@ class _FragTransactionPageState extends State<FragTransactionPage> {
     );
   }
 
-  Widget allTransactionsUI(arrExpense) {
+  Widget allTransactionsUI(List<DateWiseExpenseModel>arrDayWiseExpense) {
     return ListView.builder(
-      itemCount: arrExpense.length,
-      itemBuilder: (context, index) =>
-          dayWiseTransactionItem((arrExpense[index] as ExpenseModel).toMap()),
+      itemCount: arrDayWiseExpense.length,
+      itemBuilder: (context, index) => dayWiseTransactionItem(
+          (arrDayWiseExpense[index]).toMap()),
     );
   }
 
@@ -187,15 +396,14 @@ class _FragTransactionPageState extends State<FragTransactionPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Today',
-                  /*dayWiseTransDetails['day'],*/
+                  dayWiseTransDetails['date'],
                   style: mTextStyle12(
                       mColor: isLight
                           ? MyColor.secondaryWColor
                           : MyColor.secondaryBColor),
                 ),
                 Text(
-                  '\$100' /*'\$ ${dayWiseTransDetails['amt']}'*/,
+                  '\$ ${dayWiseTransDetails['amt']}',
                   style: mTextStyle12(
                       mColor: isLight
                           ? MyColor.secondaryWColor
@@ -206,20 +414,23 @@ class _FragTransactionPageState extends State<FragTransactionPage> {
           ),
           BlocBuilder<ExpenseTypeBloc, ExpenseTypeState>(
             builder: (context, state) {
-              if(state is ExpenseTypeLoadedState) {
-                return detailTransactionItem(dayWiseTransDetails, state.arrExpenseType);
-              } else if(state is ExpenseTypeLoadingState){
+              if (state is ExpenseTypeLoadedState) {
+                return ListView.builder(
+                  itemCount: dayWiseTransDetails['arrExpenses'].length,
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemBuilder: (context, index) => detailTransactionItem(
+                      (dayWiseTransDetails['arrExpenses'][index]
+                              as ExpenseModel)
+                          .toMap(),
+                      state.arrExpenseType),
+                );
+              } else if (state is ExpenseTypeLoadingState) {
                 return CircularProgressIndicator();
               }
               return Container();
             },
           ),
-          /*ListView.builder(
-            itemCount: dayWiseTransDetails['transactions'].length,
-            shrinkWrap: true,
-            itemBuilder: (context, index) => detailTransactionItem(
-                dayWiseTransDetails['transactions'][index]),
-          ),*/
           SizedBox(
             height: 21,
           )
@@ -228,15 +439,14 @@ class _FragTransactionPageState extends State<FragTransactionPage> {
     );
   }
 
-  Widget detailTransactionItem(Map detailedTrans, List<CatModel>arrExpenseType) {
-
+  Widget detailTransactionItem(
+      Map detailedTrans, List<CatModel> arrExpenseType) {
     var catImgPath = "";
 
     print(detailedTrans[DBHelper.EXPENSE_COLUMN_CAT_ID]);
 
-
-    for(CatModel cat in arrExpenseType){
-      if(cat.catId==detailedTrans[DBHelper.EXPENSE_COLUMN_CAT_ID]){
+    for (CatModel cat in arrExpenseType) {
+      if (cat.catId == detailedTrans[DBHelper.EXPENSE_COLUMN_CAT_ID]) {
         catImgPath = cat.imgPath;
       }
     }
@@ -260,7 +470,7 @@ class _FragTransactionPageState extends State<FragTransactionPage> {
               style: mTextStyle12(
                   mColor: isLight ? MyColor.textWColor : MyColor.textBColor,
                   fontWeight: FontWeight.bold)),
-          Text('\$ ${detailedTrans[DBHelper.EXPENSE_COLUMN_AMT]}',
+          Text('\$ ${detailedTrans[DBHelper.EXPENSE_COLUMN_BAL]}',
               style: mTextStyle12(
                   mColor: isLight ? MyColor.textWColor : MyColor.textBColor))
         ],

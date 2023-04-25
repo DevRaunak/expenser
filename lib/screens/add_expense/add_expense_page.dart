@@ -11,7 +11,10 @@ import 'package:intl/intl.dart';
 import '../../ui/ui_helper.dart';
 
 class AddExpensePage extends StatefulWidget {
-  const AddExpensePage({Key? key}) : super(key: key);
+  double balanceTillNow;
+
+  AddExpensePage(this.balanceTillNow);
+
 
   @override
   State<AddExpensePage> createState() => _AddExpensePageState();
@@ -25,6 +28,12 @@ class _AddExpensePageState extends State<AddExpensePage> {
   var _selectedIndex = -1;
 
   List<CatModel> arrExpenseType = [];
+
+  var defaultDropDownValue = 'Debit';
+
+  List<String> arrTransType = ['Debit', 'Credit'];
+
+  bool selflag = false;
 
   @override
   void initState() {
@@ -191,24 +200,59 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   SizedBox(
                     height: 21,
                   ),
+
+
+                  DropdownButton(
+                    icon: Icon(Icons.arrow_drop_down_circle_outlined),
+                      dropdownColor: Colors.black,
+                      value: defaultDropDownValue,
+                      items: arrTransType
+                          .map((value) => DropdownMenuItem(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(value, style: mTextStyle16(mColor: Colors.white),),
+                          ), value: value,))
+                          .toList(),
+                      onChanged: (dynamic selectedValue){
+                        defaultDropDownValue = selectedValue;
+                        setState((){
+
+                        });
+                      }),
+                  SizedBox(
+                    height: 21,
+                  ),
                   BlocListener<ExpenseBloc, ExpenseState>(
                     listener: (context, state) {
-                      if(state is ExpenseLoadingState){
+                      if (state is ExpenseLoadingState) {
                         print("Loading");
-                      } else if(state is ExpenseLoadedState){
+                      } else if (state is ExpenseLoadedState) {
                         print("Loaded");
                         Navigator.pop(context);
                       }
                     },
                     child: CustomRoundedButton(
                         callback: () {
-                          var frmt = DateFormat.y();
+                          /*var frmt = DateFormat.y();
                           var frmt2 = DateFormat.MMMMd();
                           var frmt3 = DateFormat.Hms();
 
                           var currentTime =
                               '${frmt.format(DateTime.now())} ${frmt2.format(DateTime.now())} ${frmt3.format(DateTime.now())}.${DateTime.now().millisecond}';
-                          print(currentTime);
+                          print(currentTime);*/
+
+                          var newBalance = 0.0;
+
+                          if(defaultDropDownValue==arrTransType[0]){
+                            //debit
+                            newBalance = widget.balanceTillNow - double.parse(
+                                amtController.text.toString());
+                          } else {
+                            //credit
+                            newBalance = widget.balanceTillNow + double.parse(
+                                amtController.text.toString());
+                          }
+
 
                           if (_selectedIndex != -1) {
                             BlocProvider.of<ExpenseBloc>(context).add(
@@ -217,13 +261,15 @@ class _AddExpensePageState extends State<AddExpensePage> {
                                     desc: descController.text,
                                     amt: double.parse(
                                         amtController.text.toString()),
-                                    expenseType: "credit",
+                                    bal: newBalance,
+                                    expenseType: defaultDropDownValue,
                                     catId: arrExpenseType[_selectedIndex].catId,
-                                    time: currentTime)));
+                                    time: DateTime.now().toString())));
                           }
                         },
                         text: 'Add'),
-                  )
+                  ),
+
                 ],
               ),
             ))
@@ -232,4 +278,35 @@ class _AddExpensePageState extends State<AddExpensePage> {
       ),
     );
   }
+
+ /* @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: MyColor.bgBColor,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 21.0, vertical: 21.0),
+          child: Column(
+              children: [
+                CustomRoundedButton(callback: (){
+                  selflag = true;
+                  setState((){});
+                },
+                    text: 'Credit', borderColor: selflag?Colors.red:Colors.transparent,),
+                SizedBox(
+                  height: 21,
+                ),
+                CustomRoundedButton(callback: (){
+                  selflag = false;
+                  setState((){});
+                },
+                    text: 'Debit', borderColor: selflag==false?Colors.red:Colors.transparent,)
+              ],
+            ),
+        ),
+      ),
+    );
+  }*/
+
+
 }

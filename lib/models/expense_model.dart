@@ -5,6 +5,7 @@ class ExpenseModel {
   String? title;
   String? desc;
   double? amt;
+  double? bal;
   int? catId;
   String? expenseType;
   String? time;
@@ -14,6 +15,7 @@ class ExpenseModel {
       this.title,
       this.desc,
       this.amt,
+      this.bal,
       this.catId,
       this.expenseType,
       this.time});
@@ -24,6 +26,7 @@ class ExpenseModel {
       title: map[DBHelper.EXPENSE_COLUMN_TITLE],
       desc: map[DBHelper.EXPENSE_COLUMN_DESC],
       amt: map[DBHelper.EXPENSE_COLUMN_AMT],
+      bal: map[DBHelper.EXPENSE_COLUMN_BAL],
       catId: map[DBHelper.EXPENSE_COLUMN_CAT_ID],
       expenseType: map[DBHelper.EXPENSE_COLUMN_EXPENSE_TYPE],
       time: map[DBHelper.EXPENSE_COLUMN_TIME]
@@ -35,6 +38,7 @@ class ExpenseModel {
       DBHelper.EXPENSE_COLUMN_TITLE : title,
       DBHelper.EXPENSE_COLUMN_DESC : desc,
       DBHelper.EXPENSE_COLUMN_AMT : amt,
+      DBHelper.EXPENSE_COLUMN_BAL : bal,
       DBHelper.EXPENSE_COLUMN_CAT_ID : catId,
       DBHelper.EXPENSE_COLUMN_EXPENSE_TYPE : expenseType,
       DBHelper.EXPENSE_COLUMN_TIME : time,

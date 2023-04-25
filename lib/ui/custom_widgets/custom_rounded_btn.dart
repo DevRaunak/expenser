@@ -5,8 +5,9 @@ class CustomRoundedButton extends StatelessWidget {
   VoidCallback callback;
   String text;
   Widget? mChild;
+  Color? borderColor;
 
-  CustomRoundedButton({required this.callback, required this.text, this.mChild});
+  CustomRoundedButton({required this.callback, required this.text, this.mChild, this.borderColor});
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,13 @@ class CustomRoundedButton extends StatelessWidget {
         onPressed: callback,
         style: ElevatedButton.styleFrom(
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(21)),
+              RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(21),
+                side: BorderSide(
+                  color: borderColor ?? Colors.white,
+                  width: borderColor !=null ? 2 : 0
+                )
+              ),
           primary: Theme.of(context).brightness == Brightness.light
               ? MyColor.secondaryBColor
               : MyColor.secondaryWColor,

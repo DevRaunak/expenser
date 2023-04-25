@@ -10,6 +10,7 @@ class DBHelper {
   static const String EXPENSE_COLUMN_TITLE = "title";
   static const String EXPENSE_COLUMN_DESC = "desc";
   static const String EXPENSE_COLUMN_AMT = "amount";
+  static const String EXPENSE_COLUMN_BAL = "balance";
   static const String EXPENSE_COLUMN_CAT_ID = "cat_id";
   static const String EXPENSE_COLUMN_EXPENSE_TYPE = "expense_type";
   static const String EXPENSE_COLUMN_TIME = "time";
@@ -34,7 +35,7 @@ class DBHelper {
 
       //Creating Expense Table
       db.execute(
-          "create table $EXPENSE_TABLE ( $EXPENSE_COLUMN_ID integer primary key autoincrement, $EXPENSE_COLUMN_TITLE text, $EXPENSE_COLUMN_DESC text, $EXPENSE_COLUMN_AMT real, $EXPENSE_COLUMN_CAT_ID integer, $EXPENSE_COLUMN_EXPENSE_TYPE integer, $EXPENSE_COLUMN_TIME text)"
+          "create table $EXPENSE_TABLE ( $EXPENSE_COLUMN_ID integer primary key autoincrement, $EXPENSE_COLUMN_TITLE text, $EXPENSE_COLUMN_DESC text, $EXPENSE_COLUMN_AMT real, $EXPENSE_COLUMN_BAL real, $EXPENSE_COLUMN_CAT_ID integer, $EXPENSE_COLUMN_EXPENSE_TYPE integer, $EXPENSE_COLUMN_TIME text)"
       );
 
       //Creating Category Table
@@ -121,5 +122,34 @@ class DBHelper {
     return arrCat;
   }
 
+  /*Future<List<ExpenseModel>> fetchExpenseAccToDate(DateTime time) async{
+    //select * from table where month(date) = 3
 
+    var myDB = await openDB();
+
+    List<Map<String, dynamic>> data;
+
+    data = await myDB.query(EXPENSE_TABLE, where: );
+
+    List<ExpenseModel> arrExpense = [];
+
+    for(Map<String, dynamic> expense in data){
+      *//*ExpenseModel model = ExpenseModel();
+
+      model.eid = expense[EXPENSE_COLUMN_ID];
+      model.title = expense[EXPENSE_COLUMN_TITLE];
+      model.desc = expense[EXPENSE_COLUMN_DESC];
+      model.amt = expense[EXPENSE_COLUMN_AMT];
+      model.catId = expense[EXPENSE_COLUMN_CAT_ID];
+      model.expenseType = expense[EXPENSE_COLUMN_EXPENSE_TYPE];
+      model.time = expense[EXPENSE_COLUMN_TIME];*//*
+
+      arrExpense.add(ExpenseModel.fromMap(expense));
+
+    }
+
+    return arrExpense;
+
+  }
+*/
 }
