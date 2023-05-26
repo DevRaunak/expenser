@@ -7,10 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:toast/toast.dart';
 
+import 'db_helper.dart';
+
 void main() {
   runApp(MultiBlocProvider(providers: [
     BlocProvider<ExpenseBloc>(
-      create: (BuildContext context) => ExpenseBloc(),
+      create: (BuildContext context) => ExpenseBloc(dbHelper: DBHelper()),
     ),
 
     BlocProvider<ExpenseTypeBloc>(
@@ -41,6 +43,6 @@ class MyApp extends StatelessWidget {
             backgroundColor: MyColor.bgWColor,
             canvasColor: MyColor.bgBColor,
             shadowColor: MyColor.lightTextWColor),
-        home: HomePage());
+        home: SplashPage());
   }
 }

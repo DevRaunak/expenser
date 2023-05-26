@@ -9,12 +9,13 @@ part 'expense_state.dart';
 part 'expense_event.dart';
 
 class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
-  ExpenseBloc() : super(ExpenseInitialState()) {
+  final DBHelper dbHelper;
+  ExpenseBloc({required this.dbHelper}) : super(ExpenseInitialState()) {
 
     on<NewExpenseEvent>((event, emit) async {
       emit(ExpenseLoadingState());
-      if(await DBHelper().addExpense(event.newExpense)){
-        var arrExpenses = await DBHelper().fetchData();
+      if(await dbHelper.addExpense(event.newExpense)){
+        var arrExpenses = await dbHelper.fetchData();
         emit(ExpenseLoadedState(arrExpenses));
       } else {
         emit(ExpenseErrorState("Expense not Added!!"));
@@ -24,7 +25,7 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState> {
 
     on<FetchExpenseEvent>((event, emit) async {
       emit(ExpenseLoadingState());
-      var arrExpenses = await DBHelper().fetchData();
+      var arrExpenses = await dbHelper.fetchData();
       emit(ExpenseLoadedState(arrExpenses));
     });
   }
